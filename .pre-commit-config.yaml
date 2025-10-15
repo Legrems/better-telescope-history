@@ -1,0 +1,55 @@
+# Pre-commit hooks for better-telescope-history
+# See https://pre-commit.com for more information
+
+repos:
+  # General file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.txt$'
+      - id: end-of-file-fixer
+        exclude: '\.txt$'
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Lua formatting with StyLua
+  - repo: https://github.com/JohnnyMorganz/StyLua
+    rev: v0.20.0
+    hooks:
+      - id: stylua
+        args: ['--config-path=stylua.toml']
+        files: '\.lua$'
+
+  # Lua linting with luacheck
+  - repo: https://github.com/lunarmodules/luacheck
+    rev: v1.1.2
+    hooks:
+      - id: luacheck
+        args: ['--config=.luacheckrc']
+        files: '\.lua$'
+
+  # Markdown formatting (optional)
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-tables
+        files: '\.md$'
+        exclude: 'CHANGELOG.md'
+
+  # Check for syntax errors
+  - repo: local
+    hooks:
+      - id: lua-syntax-check
+        name: Lua Syntax Check
+        entry: luac -p
+        language: system
+        files: '\.lua$'
+        pass_filenames: true
