@@ -1,0 +1,192 @@
+*telescope-history.txt*  Enhanced Telescope search history with SQLite storage
+
+==============================================================================
+CONTENTS                                            *telescope-history-contents*
+
+    1. Introduction ..................... |telescope-history-introduction|
+    2. Requirements ..................... |telescope-history-requirements|
+    3. Installation ..................... |telescope-history-installation|
+    4. Configuration .................... |telescope-history-configuration|
+    5. Usage ............................ |telescope-history-usage|
+    6. Commands ......................... |telescope-history-commands|
+    7. API .............................. |telescope-history-api|
+
+==============================================================================
+INTRODUCTION                                    *telescope-history-introduction*
+
+Better Telescope History is a Neovim plugin that enhances Telescope by storing
+and managing your search history in a local SQLite database. It automatically
+tracks your searches and provides an easy way to browse and re-execute past
+searches.
+
+Features:
+- Persistent search history stored in SQLite
+- Project-based or global history tracking
+- Browse and re-execute past searches
+- Configurable tracking and storage options
+- Statistics about your search patterns
+
+==============================================================================
+REQUIREMENTS                                    *telescope-history-requirements*
+
+- Neovim >= 0.9.0
+- telescope.nvim (https://github.com/nvim-telescope/telescope.nvim)
+- sqlite.lua (https://github.com/kkharji/sqlite.lua)
+
+==============================================================================
+INSTALLATION                                    *telescope-history-installation*
+
+Using lazy.nvim: >lua
+    {
+      "legrems/better-telescope-history",
+      dependencies = {
+        "nvim-telescope/telescope.nvim",
+        "kkharji/sqlite.lua",
+      },
+      config = function()
+        require("telescope-history").setup()
+        require("telescope").load_extension("history")
+      end,
+    }
+<
+
+==============================================================================
+CONFIGURATION                                  *telescope-history-configuration*
+
+Setup function: >lua
+    require("telescope-history").setup({
+      scope = "project",           -- "project" or "global"
+      max_entries = 1000,          -- Max entries per project/globally
+      max_results = 100,           -- Max results in picker
+      track_types = {              -- Search types to track
+        "live_grep",
+        "grep_string",
+        "find_files",
+      },
+      auto_save = true,            -- Automatically save searches
+      ignore_patterns = {},        -- Lua patterns to ignore
+    })
+<
+
+Options:                                       *telescope-history-options*
+
+    scope           (string)  History scope: "project" or "global"
+                              Default: "project"
+
+    max_entries     (number)  Maximum number of entries to store
+                              Default: 1000
+
+    max_results     (number)  Maximum results shown in picker
+                              Default: 100
+
+    track_types     (table)   List of search types to track
+                              Default: {"live_grep", "grep_string", "find_files"}
+
+    auto_save       (boolean) Automatically save searches
+                              Default: true
+
+    ignore_patterns (table)   Lua patterns to ignore when saving
+                              Default: {}
+
+==============================================================================
+USAGE                                                  *telescope-history-usage*
+
+Open the search history picker: >vim
+    :TelescopeHistory
+<
+
+Or using Lua: >lua
+    require("telescope").extensions.history.history()
+<
+
+Recommended keybinding: >lua
+    vim.keymap.set("n", "<leader>fh", "<cmd>TelescopeHistory<cr>",
+      { desc = "Search History" })
+<
+
+In the history picker:
+    <CR>     - Re-execute the selected search
+    <C-d>    - Delete the selected history entry
+    j/k      - Navigate entries
+    /        - Filter/search entries
+
+==============================================================================
+COMMANDS                                            *telescope-history-commands*
+
+                                                           *:TelescopeHistory*
+:TelescopeHistory
+    Open the search history picker.
+
+                                                      *:TelescopeHistoryClear*
+:TelescopeHistoryClear
+    Clear search history for the current project.
+
+                                                   *:TelescopeHistoryClearAll*
+:TelescopeHistoryClearAll
+    Clear all search history (requires confirmation).
+
+                                                      *:TelescopeHistoryStats*
+:TelescopeHistoryStats
+    Show statistics about your search history.
+
+==============================================================================
+API                                                      *telescope-history-api*
+
+Module: telescope-history
+
+    setup({config})                                *telescope-history.setup()*
+        Initialize the plugin with configuration.
+
+        Parameters: ~
+            {config} (table) Configuration options
+
+Module: telescope-history.db
+
+    add_search({term}, {type}, {path})    *telescope-history.db.add_search()*
+        Add a search to the history.
+
+        Parameters: ~
+            {term} (string) Search term
+            {type} (string) Search type (e.g., "live_grep")
+            {path} (string) Project path
+
+    get_history({path}, {limit})         *telescope-history.db.get_history()*
+        Get search history for a project.
+
+        Parameters: ~
+            {path}  (string) Project path
+            {limit} (number) Maximum number of results
+
+        Returns: ~
+            (table) List of history entries
+
+    clear_project_history({path})  *telescope-history.db.clear_project_history()*
+        Clear history for a specific project.
+
+        Parameters: ~
+            {path} (string) Project path
+
+    clear_all_history()               *telescope-history.db.clear_all_history()*
+        Clear all history.
+
+    get_stats()                             *telescope-history.db.get_stats()*
+        Get statistics about search history.
+
+        Returns: ~
+            (table) Statistics with total_searches, projects, and search_types
+
+Module: telescope-history.tracker
+
+    setup_hooks()                      *telescope-history.tracker.setup_hooks()*
+        Set up automatic tracking hooks.
+
+    save_search({term}, {type})      *telescope-history.tracker.save_search()*
+        Manually save a search to history.
+
+        Parameters: ~
+            {term} (string) Search term
+            {type} (string) Search type
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
+
